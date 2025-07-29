@@ -10,16 +10,37 @@ import {
     ConversationContent
 } from '../types';
 
-if (!process.env.API_KEY) {
-    console.error("API_KEY is not set in environment variables.");
-}
+// API 키를 더 안전하게 가져오기
+const getApiKey = () => {
+    // 환경 변수에서 먼저 시도
+    if (process.env.API_KEY) {
+        return process.env.API_KEY;
+    }
+    if (process.env.GEMINI_API_KEY) {
+        return process.env.GEMINI_API_KEY;
+    }
+    
+    // GitHub Pages에서는 window 객체에 저장된 키를 사용
+    if (typeof window !== 'undefined' && (window as any).GEMINI_API_KEY) {
+        return (window as any).GEMINI_API_KEY;
+    }
+    
+    console.error("API_KEY is not set in environment variables or window object.");
+    return null;
+};
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+const apiKey = getApiKey();
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 const getTodayDateString = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' });
 
 const generateJsonContent = async <T,>(prompt: string, responseSchema: any): Promise<T | null> => {
     try {
+        if (!ai) {
+            console.error("AI service is not initialized - API key missing");
+            return null;
+        }
+        
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
@@ -40,6 +61,11 @@ const generateJsonContent = async <T,>(prompt: string, responseSchema: any): Pro
 const getFortune = async (birthDate: string, date: string): Promise<FortuneContent | null> => {
     const prompt = `${date} 기준, 생년월일이 ${birthDate}인 사람의 오늘의 총운과 금전운을 합해서 150자 내외로 재미있고 긍정적으로 설명해주세요.`;
     try {
+        if (!ai) {
+            console.error("AI service is not initialized - API key missing");
+            return null;
+        }
+        
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
@@ -90,6 +116,12 @@ const getHealthExercise = async (date: string): Promise<HealthContent | null> =>
 
     for (const step of content.steps) {
         try {
+            if (!ai) {
+                console.error("AI service is not initialized - API key missing");
+                step.imageUrl = `https://picsum.photos/seed/${encodeURIComponent(step.imagePrompt)}/512/512`;
+                continue;
+            }
+            
             const imageResponse = await ai.models.generateImages({
                 model: 'imagen-3.0-generate-002',
                 prompt: step.imagePrompt,

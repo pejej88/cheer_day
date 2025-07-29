@@ -49,7 +49,12 @@ export const useChallengeContent = (categoryKey: CategoryKey | null, date: strin
             }
         } catch (err) {
             console.error(err);
-            setError('오류가 발생했습니다. 다시 시도해주세요.');
+            // API 키가 없는 경우 더 구체적인 에러 메시지 제공
+            if (err instanceof Error && err.message.includes('API key')) {
+                setError('API 키가 설정되지 않았습니다. 관리자에게 문의해주세요.');
+            } else {
+                setError('챌린지 내용을 불러오는데 실패했습니다. 다시 시도해주세요.');
+            }
         } finally {
             setIsLoading(false);
         }
