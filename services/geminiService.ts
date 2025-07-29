@@ -59,6 +59,12 @@ const generateJsonContent = async <T,>(prompt: string, responseSchema: any): Pro
 
 
 const getFortune = async (birthDate: string, date: string): Promise<FortuneContent | null> => {
+    // 생년월일 형식 검증
+    if (!birthDate || birthDate.length !== 8 || !/^\d{8}$/.test(birthDate)) {
+        console.error('Invalid birth date format:', birthDate);
+        return null;
+    }
+    
     const prompt = `${date} 기준, 생년월일이 ${birthDate}인 사람의 오늘의 총운과 금전운을 합해서 150자 내외로 재미있고 긍정적으로 설명해주세요.`;
     try {
         if (!ai) {

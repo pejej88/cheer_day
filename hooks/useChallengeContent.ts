@@ -24,10 +24,19 @@ export const useChallengeContent = (categoryKey: CategoryKey | null, date: strin
             return;
         }
 
+        // 운세의 경우 생년월일이 변경되면 기존 캐시 무효화
+        if (categoryKey === 'fortune' && userInfo.birthDate) {
+            const oldCacheKey = `${CACHE_PREFIX}${date}_${categoryKey}`;
+            sessionStorage.removeItem(oldCacheKey);
+        }
+
         setIsLoading(true);
         setError(null);
         
-        const cacheKey = `${CACHE_PREFIX}${date}_${categoryKey}`;
+        // 운세의 경우 생년월일을 포함한 캐시 키 생성
+        const cacheKey = categoryKey === 'fortune' 
+            ? `${CACHE_PREFIX}${date}_${categoryKey}_${userInfo.birthDate || 'no_birthdate'}`
+            : `${CACHE_PREFIX}${date}_${categoryKey}`;
 
         try {
             // Check cache first
@@ -39,12 +48,15 @@ export const useChallengeContent = (categoryKey: CategoryKey | null, date: strin
             }
 
             // If not in cache, fetch from service
+            console.log('Fetching content for:', { categoryKey, date, birthDate: userInfo.birthDate });
             const fetchedContent = await getChallengeContentForDate(categoryKey, date, userInfo);
             
             if (fetchedContent) {
+                console.log('Content fetched successfully:', fetchedContent);
                 setContent(fetchedContent);
                 sessionStorage.setItem(cacheKey, JSON.stringify(fetchedContent));
             } else {
+                console.error('Failed to fetch content for:', { categoryKey, date, birthDate: userInfo.birthDate });
                 setError('챌린지 내용을 불러오는데 실패했습니다.');
             }
         } catch (err) {

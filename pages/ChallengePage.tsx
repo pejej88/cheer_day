@@ -22,7 +22,7 @@ const ErrorDisplay: React.FC<{ message: string, onRetry: () => void }> = ({ mess
     </div>
 );
 
-const FortuneChallenge: React.FC<{ content: FortuneContent, onComplete: () => void }> = ({ content, onComplete }) => {
+const FortuneChallenge: React.FC<{ content: FortuneContent, onComplete: () => void, onBirthDateChange: () => void }> = ({ content, onComplete, onBirthDateChange }) => {
     const { userInfo, setBirthDate } = useAAppContext();
     const [inputBirthDate, setInputBirthDate] = useState(userInfo.birthDate || '');
     const [isSubmitted, setIsSubmitted] = useState(!!userInfo.birthDate);
@@ -32,6 +32,8 @@ const FortuneChallenge: React.FC<{ content: FortuneContent, onComplete: () => vo
         if (/^\d{8}$/.test(inputBirthDate)) {
             setBirthDate(inputBirthDate);
             setIsSubmitted(true);
+            // 생년월일이 변경되면 콜백 호출하여 새로운 운세 로드
+            onBirthDateChange();
         } else {
             alert('생년월일을 8자리 숫자로 입력해주세요. (예: 19900101)');
         }
@@ -220,7 +222,11 @@ const ChallengePage = () => {
         
         switch (categoryKey) {
             case 'fortune':
-                return <FortuneChallenge content={content as FortuneContent} onComplete={handleComplete} />;
+                return <FortuneChallenge 
+                    content={content as FortuneContent} 
+                    onComplete={handleComplete} 
+                    onBirthDateChange={refetch}
+                />;
             case 'economics':
                 return <EconomicsChallenge content={content as EconomicsContent} onComplete={handleComplete} />;
             case 'health':
@@ -251,7 +257,11 @@ const ChallengePage = () => {
                     {/* Special case: For 'fortune' category, if birth date is missing, show form to input it. */}
                     {categoryKey === 'fortune' && !userInfo.birthDate && (
                          <div className="space-y-4">
-                            <FortuneChallenge content={{text: ""}} onComplete={() => {}}/>
+                            <FortuneChallenge 
+                                content={{text: ""}} 
+                                onComplete={() => {}}
+                                onBirthDateChange={refetch}
+                            />
                          </div>
                     )}
                 </>
