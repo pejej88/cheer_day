@@ -10,3 +10,6 @@ window.KAKAO_CONFIG = {
   REDIRECT_URI: 'https://pejej88.github.io/cheer_day/#/auth/kakao/callback', // 프로덕션 환경
   // REDIRECT_URI: 'http://localhost:5173/#/auth/kakao/callback', // 개발 환경
 };
+
+// 설정 로드 완료 확인
+console.log('config.js 로드 완료:', window.KAKAO_CONFIG);
