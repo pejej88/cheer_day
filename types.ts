@@ -72,3 +72,22 @@ export interface AppData {
     activityLog: ActivityLog[];
     categoryStats: CategoryStats;
 }
+
+// Kakao SDK 타입 정의
+declare global {
+  interface Window {
+    Kakao: {
+      init: (key: string) => void;
+      isInitialized: () => boolean;
+      Auth: {
+        login: (options: {
+          scope: string;
+          success: (authObj: { access_token: string }) => void;
+          fail: (err: any) => void;
+        }) => void;
+      };
+    };
+  }
+}
+
+export {};
