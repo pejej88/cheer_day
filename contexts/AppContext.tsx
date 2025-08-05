@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { AppData, UserInfo, ActivityLog, CategoryStats, CategoryKey, ChallengeContent } from '../types';
 import { CATEGORY_MAP } from '../constants';
-import { useAuth } from './AuthContext';
 
 const LOCAL_STORAGE_KEY = 'todayChallengeApp';
 
@@ -19,10 +18,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const getTodayDateString = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' });
 
-const getStorageKey = (userId: string) => `${LOCAL_STORAGE_KEY}_${userId}`;
-
 export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { user } = useAuth();
     const [isInitialized, setIsInitialized] = useState(false);
     const [appData, setAppData] = useState<AppData>({
         userInfo: {},
@@ -30,54 +26,34 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
         categoryStats: {},
     });
 
-    // 사용자별 데이터 로드
+    // 데이터 로드
     useEffect(() => {
-        if (user) {
-            try {
-                const userStorageKey = getStorageKey(user.id.toString());
-                const storedData = localStorage.getItem(userStorageKey);
-                if (storedData) {
-                    const parsedData = JSON.parse(storedData) as AppData;
-                    // Add a guard to prevent crashes from corrupted data
-                    if (!Array.isArray(parsedData.activityLog)) {
-                        parsedData.activityLog = [];
-                    }
-                    setAppData(parsedData);
-                } else {
-                    // 새 사용자일 경우 기본 데이터 설정
-                    setAppData({
-                        userInfo: {},
-                        activityLog: [],
-                        categoryStats: {},
-                    });
+        try {
+            const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (storedData) {
+                const parsedData = JSON.parse(storedData) as AppData;
+                if (!Array.isArray(parsedData.activityLog)) {
+                    parsedData.activityLog = [];
                 }
-            } catch (error) {
-                console.error("Failed to load data from localStorage", error);
-            } finally {
-                setIsInitialized(true);
+                setAppData(parsedData);
             }
-        } else {
-            // 로그인하지 않은 경우 기본 상태
-            setAppData({
-                userInfo: {},
-                activityLog: [],
-                categoryStats: {},
-            });
+        } catch (error) {
+            console.error("Failed to load data from localStorage", error);
+        } finally {
             setIsInitialized(true);
         }
-    }, [user]);
+    }, []);
 
-    // 사용자별 데이터 저장
+    // 데이터 저장
     useEffect(() => {
-        if (isInitialized && user) {
+        if (isInitialized) {
             try {
-                const userStorageKey = getStorageKey(user.id.toString());
-                localStorage.setItem(userStorageKey, JSON.stringify(appData));
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(appData));
             } catch (error) {
                 console.error("Failed to save data to localStorage", error);
             }
         }
-    }, [appData, isInitialized, user]);
+    }, [appData, isInitialized]);
 
     const setBirthDate = useCallback((birthDate: string) => {
         setAppData(prev => ({
