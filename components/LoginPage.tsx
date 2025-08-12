@@ -72,7 +72,7 @@ const LoginPage: React.FC = () => {
         }
 
         window.Kakao.Auth.login({
-            success: (authObj) => {
+            success: () => {
                 // 사용자 정보 요청
                 window.Kakao.API.request({
                     url: '/v2/user/me',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAAppContext } from '../contexts/AppContext';
 import { useAuth } from '../contexts/AuthContext';
-import { ActivityLog, CategoryKey, EconomicsContent, FortuneContent, HealthContent, LanguageContent, QuizContent, ConversationContent } from '../types';
+import { ActivityLog, CategoryKey, EconomicsContent, FortuneContent, HealthContent, QuizContent, ConversationContent } from '../types';
 import { CATEGORY_MAP } from '../constants';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/solid';
 
@@ -166,7 +166,7 @@ const CategoryStatsDisplay = ({ stats }: { stats: { [key in CategoryKey]?: numbe
 }
 
 const MyPage: React.FC = () => {
-    const { userInfo, activityLog, categoryStats } = useAAppContext();
+    const { activityLog, categoryStats } = useAAppContext();
     const { user } = useAuth();
     const [selectedActivity, setSelectedActivity] = useState<ActivityLog | null>(null);
     const [currentPage, setCurrentPage] = useState(1);

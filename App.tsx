@@ -1,4 +1,3 @@
-import React from 'react';
 import { HashRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { HomeIcon, UserCircleIcon, ArrowUturnLeftIcon, FireIcon } from '@heroicons/react/24/solid';
 import { AppContextProvider, useAAppContext } from './contexts/AppContext';
